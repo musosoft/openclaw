@@ -5,10 +5,10 @@ import type {
 } from "@mariozechner/pi-agent-core";
 import type { ToolDefinition } from "@mariozechner/pi-coding-agent";
 import type { ClientToolDefinition } from "./pi-embedded-runner/run/params.js";
+import type { HookContext } from "./pi-tools.before-tool-call.js";
 import { logDebug } from "../logger.js";
 import { getGlobalHookRunner } from "../plugins/hook-runner-global.js";
 import { isPlainObject } from "../utils.js";
-import type { HookContext } from "./pi-tools.before-tool-call.js";
 import {
   consumeAdjustedParamsForToolCall,
   isToolWrappedWithBeforeToolCallHook,
@@ -92,10 +92,10 @@ function normalizeToolExecuteParams(toolName: string, params: unknown): unknown 
   if (!needsCmdShim) {
     return params;
   }
-  const escaped = command.replaceAll("\"", "\\\"");
+  const escapedForPowerShellSingleQuote = command.replaceAll("'", "''");
   return {
     ...paramsRecord,
-    command: `cmd /d /s /c "${escaped}"`,
+    command: `cmd /d /s /c '${escapedForPowerShellSingleQuote}'`,
   };
 }
 

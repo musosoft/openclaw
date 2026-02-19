@@ -92,9 +92,43 @@ describe("pi tool definition adapter", () => {
 
     const calledParams = execute.mock.calls[0]?.[1] as { command?: string } | undefined;
     if (process.platform === "win32") {
-      expect(calledParams?.command).toBe('cmd /d /s /c "echo \\"one\\" && echo two"');
+      expect(calledParams?.command).toBe("cmd /d /s /c 'echo \"one\" && echo two'");
       return;
     }
     expect(calledParams?.command).toBe('echo "one" && echo two');
+  });
+
+  it("keeps Windows paths and embedded quotes intact when shimming through cmd", async () => {
+    const execute = vi.fn(async (_toolCallId: string, params: unknown) => ({
+      content: [],
+      details: params,
+    }));
+    const tool = {
+      name: "bash",
+      label: "Bash",
+      description: "runs commands",
+      parameters: Type.Object({}),
+      execute,
+    } satisfies AgentTool;
+
+    const defs = toToolDefinitions([tool]);
+    await defs[0].execute(
+      "call5",
+      { command: '"C:\\path\\to\\file.exe" "C:\\with space\\a.txt" && echo "done"' },
+      undefined,
+      undefined,
+      extensionContext,
+    );
+
+    const calledParams = execute.mock.calls[0]?.[1] as { command?: string } | undefined;
+    if (process.platform === "win32") {
+      expect(calledParams?.command).toBe(
+        `cmd /d /s /c '"C:\\path\\to\\file.exe" "C:\\with space\\a.txt" && echo "done"'`,
+      );
+      return;
+    }
+    expect(calledParams?.command).toBe(
+      '"C:\\path\\to\\file.exe" "C:\\with space\\a.txt" && echo "done"',
+    );
   });
 });

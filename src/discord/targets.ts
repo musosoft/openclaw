@@ -96,7 +96,11 @@ export async function resolveDiscordTarget(
   // Parse directly if it's already a known format. Use a safe parse so ambiguous
   // numeric targets don't throw when we still want to attempt username lookup.
   const directParse = safeParseDiscordTarget(trimmed, parseOptions);
-  if (directParse && directParse.kind !== "channel" && !shouldResolveUserViaDirectory(trimmed, directParse)) {
+  if (
+    directParse &&
+    directParse.kind !== "channel" &&
+    !shouldResolveUserViaDirectory(trimmed, directParse)
+  ) {
     return directParse;
   }
 
