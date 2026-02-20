@@ -66,6 +66,11 @@ foreach ($file in $files) {
   # Windows command resolution: force openclaw.cmd so .ps1 association is never required
   $text = $text -replace '"npm","pnpm","yarn","npx"', '"npm","pnpm","yarn","npx","openclaw"'
   $text = $text -replace '"npm", "pnpm", "yarn", "npx"', '"npm", "pnpm", "yarn", "npx", "openclaw"'
+  $text = [regex]::Replace(
+    $text,
+    '\[\s*"npm"\s*,\s*"pnpm"\s*,\s*"yarn"\s*,\s*"npx"\s*\]\.includes\(basename\)',
+    '["npm","pnpm","yarn","npx","openclaw"].includes(basename)'
+  )
   $text = $text -replace 'basename === "npm" \|\| basename === "pnpm" \|\| basename === "yarn" \|\| basename === "npx"', 'basename === "npm" || basename === "pnpm" || basename === "yarn" || basename === "npx" || basename === "openclaw"'
 
   if ($text -ne $original) {
