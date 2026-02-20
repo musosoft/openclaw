@@ -22,7 +22,7 @@ function resolveCommand(command: string): string {
     return command;
   }
   // Common npm-related commands that need .cmd extension on Windows
-  const cmdCommands = ["npm", "pnpm", "yarn", "npx"];
+  const cmdCommands = ["npm", "pnpm", "yarn", "npx", "openclaw"];
   if (cmdCommands.includes(basename)) {
     return `${command}.cmd`;
   }

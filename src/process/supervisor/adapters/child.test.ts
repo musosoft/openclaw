@@ -18,6 +18,16 @@ vi.mock("../../kill-tree.js", () => ({
 
 let createChildAdapter: typeof import("./child.js").createChildAdapter;
 
+async function withPlatform<T>(platform: NodeJS.Platform, run: () => Promise<T>): Promise<T> {
+  const originalPlatform = process.platform;
+  Object.defineProperty(process, "platform", { value: platform, configurable: true });
+  try {
+    return await run();
+  } finally {
+    Object.defineProperty(process, "platform", { value: originalPlatform, configurable: true });
+  }
+}
+
 function createStubChild(pid = 1234) {
   const child = new EventEmitter() as ChildProcess;
   child.stdin = new PassThrough() as ChildProcess["stdin"];
@@ -113,5 +123,19 @@ describe("createChildAdapter", () => {
       options?: { env?: Record<string, string> };
     };
     expect(spawnArgs.options?.env).toEqual({ FOO: "bar", COUNT: "12" });
+  });
+
+  it("resolves openclaw to .cmd on Windows", async () => {
+    await withPlatform("win32", async () => {
+      await createAdapterHarness({
+        pid: 5555,
+        argv: ["openclaw", "--version"],
+      });
+
+      const spawnArgs = spawnWithFallbackMock.mock.calls[0]?.[0] as {
+        argv?: string[];
+      };
+      expect(spawnArgs.argv?.[0]).toBe("openclaw.cmd");
+    });
   });
 });

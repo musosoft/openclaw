@@ -13,6 +13,7 @@ if (-not (Test-Path $distRoot)) {
 $targets = @(
   "config-*.js",
   "daemon-cli.js",
+  "exec-*.js",
   "pi-embedded-*.js",
   "reply-*.js",
   "subagent-registry-*.js",
@@ -61,6 +62,11 @@ foreach ($file in $files) {
   if ($text -match 'typingIntervalSeconds: z\.number\(\)\.int\(\)\.positive\(\)\.optional\(\)' -and $text -notmatch 'typingTtlSeconds: z\.number\(\)\.int\(\)\.positive\(\)\.optional\(\)') {
     $text = $text -replace 'typingIntervalSeconds: z\.number\(\)\.int\(\)\.positive\(\)\.optional\(\),', "typingIntervalSeconds: z.number().int().positive().optional(),`n`ttypingTtlSeconds: z.number().int().positive().optional(),"
   }
+
+  # Windows command resolution: force openclaw.cmd so .ps1 association is never required
+  $text = $text -replace '"npm","pnpm","yarn","npx"', '"npm","pnpm","yarn","npx","openclaw"'
+  $text = $text -replace '"npm", "pnpm", "yarn", "npx"', '"npm", "pnpm", "yarn", "npx", "openclaw"'
+  $text = $text -replace 'basename === "npm" \|\| basename === "pnpm" \|\| basename === "yarn" \|\| basename === "npx"', 'basename === "npm" || basename === "pnpm" || basename === "yarn" || basename === "npx" || basename === "openclaw"'
 
   if ($text -ne $original) {
     if (-not $NoBackup) {
