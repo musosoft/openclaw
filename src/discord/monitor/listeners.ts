@@ -42,6 +42,7 @@ type DiscordReactionListenerParams = {
 };
 
 const DISCORD_SLOW_LISTENER_THRESHOLD_MS = 30_000;
+const DISCORD_MESSAGE_LISTENER_THRESHOLD_MS = 20 * 60_000;
 const discordEventQueueLog = createSubsystemLogger("discord/event-queue");
 
 function logSlowDiscordListener(params: {
@@ -49,8 +50,10 @@ function logSlowDiscordListener(params: {
   listener: string;
   event: string;
   durationMs: number;
+  thresholdMs?: number;
 }) {
-  if (params.durationMs < DISCORD_SLOW_LISTENER_THRESHOLD_MS) {
+  const thresholdMs = params.thresholdMs ?? DISCORD_SLOW_LISTENER_THRESHOLD_MS;
+  if (params.durationMs < thresholdMs) {
     return;
   }
   const duration = formatDurationSeconds(params.durationMs, {
@@ -98,6 +101,8 @@ export class DiscordMessageListener extends MessageCreateListener {
           listener: this.constructor.name,
           event: this.type,
           durationMs: Date.now() - startedAt,
+          // MESSAGE_CREATE handlers intentionally run detached; warn only on very long runs.
+          thresholdMs: DISCORD_MESSAGE_LISTENER_THRESHOLD_MS,
         });
       });
   }

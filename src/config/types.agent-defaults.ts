@@ -196,6 +196,8 @@ export type AgentDefaultsConfig = {
    */
   imageMaxDimensionPx?: number;
   typingIntervalSeconds?: number;
+  /** Max typing indicator lifetime per reply run in seconds (default: 120). */
+  typingTtlSeconds?: number;
   /** Typing indicator start mode (never|instant|thinking|message). */
   typingMode?: TypingMode;
   /** Periodic background heartbeat runs. */
